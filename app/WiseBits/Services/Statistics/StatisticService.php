@@ -97,8 +97,6 @@ class StatisticService
     {
         $this->redisClient->transaction(
             static function(MultiExec $mtx) use ($statisticHashKey, $cityCode) {
-                // Set 0 if not exists
-                $mtx->hsetnx($statisticHashKey, $cityCode, 0);
                 $mtx->hincrby($statisticHashKey, $cityCode, 1);
             }
         );
