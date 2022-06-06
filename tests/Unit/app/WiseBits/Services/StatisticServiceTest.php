@@ -3,6 +3,7 @@
 namespace Tests\Unit\app\WiseBits\Services;
 
 use App\WiseBits\Services\Statistics\DTO\UpdateDTO;
+use App\WiseBits\Services\Statistics\Exceptions\StatisticException;
 use App\WiseBits\Services\Statistics\StatisticService;
 use PHPUnit\Framework\MockObject\MockObject;
 use Predis\Client;
@@ -23,24 +24,73 @@ class StatisticServiceTest extends TestCase
 
     protected ?StatisticService $statisticService = null;
 
+    /**
+     * @return void
+     */
     public function setUp(): void
     {
         parent::setUp();
 
-        $this->redisClient = $this->createMock(Client::class);
+        $this->redisClient = $this
+            ->getMockBuilder(Client::class)
+            ->disableOriginalConstructor()
+            ->addMethods(['hgetall']) // virtual method
+            ->onlyMethods(['transaction'])
+            ->getMock();
         $this->validator = $this->createMock(ValidatorInterface::class);
         $this->logger = $this->createMock(LoggerInterface::class);
+
+        $this->validator->method('validate')->willReturn([]);
+
         $this->statisticService = new StatisticService($this->redisClient, $this->validator, $this->logger);
     }
 
+    /**
+     * @throws StatisticException
+     */
     public function testUpdate(): void
     {
-        $this->validator->method('validate')->willReturn([]);
-
         $this->validator->expects(self::once())->method('validate');
         $this->redisClient->expects(self::once())->method('transaction');
 
         $updateDTO = new UpdateDTO('ru');
         $this->statisticService->update($updateDTO);
+    }
+
+    /**
+     * @dataProvider statisticsDataProvider
+     *
+     * @param array $statisticsData
+     *
+     * @throws StatisticException
+     */
+    public function testGet(array $statisticsData): void
+    {
+        $this->redisClient->method('hgetall')->willReturn($statisticsData);
+        $this->redisClient->expects(self::once())->method('hgetall');
+
+        $response = $this->statisticService->get();
+        self::assertEquals($statisticsData, $response);
+    }
+
+    /**
+     * @return array
+     */
+    public function statisticsDataProvider(): array
+    {
+        return
+            [
+                [
+                    [],
+                ],
+            [
+                [
+                    [
+                        'ru' => '5',
+                        'fr' => '10',
+                    ]
+                ]
+            ]
+        ];
     }
 }
