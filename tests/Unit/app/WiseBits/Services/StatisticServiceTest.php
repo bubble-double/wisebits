@@ -55,6 +55,8 @@ class StatisticServiceTest extends TestCase
 
         $updateDTO = new UpdateDTO('ru');
         $this->statisticService->update($updateDTO);
+        
+        // The method returns void, nothing to check through the asset
     }
 
     /**
