@@ -41,7 +41,7 @@ POST /api/statistics/{{ countryCode }}
 ```
 
 Where {{ countryCode }} is a string with a short country code. Only lowercase English letters. 
-For example: "fr".
+For example: ```/api/statistics/fr```.
 
 
 Successful response
