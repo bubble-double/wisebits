@@ -40,9 +40,9 @@ HTTP status code 400
 POST /api/statistics/{{ countryCode }}
 ```
 
-Where {{ countryCode }} is a string with a short country code. For example: "fr".
+Where {{ countryCode }} is a string with a short country code. Only lowercase English letters. 
+For example: "fr".
 
-Only lowercase letters: [a-z]+
 
 Successful response
 ```angular2html
